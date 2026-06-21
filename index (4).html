@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Intel Sustainability Summit — Check-In</title>
+
+  <!-- Display: Fraunces (warm, characterful serif). Body/data: Inter. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ----------  Design tokens  ---------- */
+    :root {
+      --cream:      #F7F4EC;  /* warm off-white page background */
+      --paper:      #FFFFFF;  /* cards */
+      --evergreen:  #1F3B2C;  /* deep text + Net Zero team */
+      --sage:       #6FA287;  /* primary green */
+      --sage-deep:  #4C8268;
+      --sky-real:   #4F9BC4;  /* Water Wise team */
+      --sun:        #E8B54D;  /* Renewables team + accent */
+      --mist:       #E7EFE8;  /* soft green tint */
+      --line:       #DED9CC;  /* hairline borders */
+      --muted:      #7C8A7F;  /* secondary text */
+
+      --radius: 18px;
+      --shadow: 0 10px 30px rgba(31, 59, 44, 0.08);
+      --shadow-sm: 0 4px 14px rgba(31, 59, 44, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      color: var(--evergreen);
+      background:
+        radial-gradient(120% 80% at 100% 0%, rgba(95,163,201,0.10), transparent 55%),
+        radial-gradient(120% 80% at 0% 100%, rgba(232,181,77,0.10), transparent 55%),
+        var(--cream);
+      min-height: 100vh;
+      line-height: 1.5;
+      padding: 32px 20px 64px;
+    }
+
+    .wrap { max-width: 940px; margin: 0 auto; }
+
+    /* ----------  Header  ---------- */
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .leaf {
+      width: 46px; height: 46px; flex: none;
+      display: grid; place-items: center;
+      background: var(--evergreen);
+      border-radius: 14px;
+      color: var(--cream);
+      font-family: 'Fraunces', serif;
+      font-weight: 600;
+      font-size: 22px;
+    }
+    .eyebrow {
+      font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--sage-deep); font-weight: 600;
+    }
+    .topbar h1 {
+      font-family: 'Fraunces', serif;
+      font-weight: 600;
+      font-size: clamp(22px, 4vw, 30px);
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+    }
+
+    /* ----------  Hero status  ---------- */
+    .hero {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 26px 28px;
+      margin-bottom: 22px;
+    }
+    .hero-top {
+      display: flex; flex-wrap: wrap; align-items: baseline;
+      justify-content: space-between; gap: 8px;
+    }
+    .count {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(40px, 9vw, 58px);
+      font-weight: 600; line-height: 1;
+      letter-spacing: -0.02em;
+    }
+    .count small { color: var(--muted); font-size: 20px; font-weight: 500; }
+    .goal-label { color: var(--muted); font-size: 14px; }
+
+    /* Progress bar — reads like a rising tide of attendance */
+    .track {
+      position: relative;
+      height: 16px;
+      background: var(--mist);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 18px;
+    }
+    .fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--sky-real), var(--sage), var(--sun));
+      transition: width 0.6s cubic-bezier(.22,.61,.36,1);
+    }
+    .progress-meta {
+      display: flex; justify-content: space-between;
+      font-size: 13px; color: var(--muted); margin-top: 8px;
+    }
+
+    /* Greeting line */
+    .greeting {
+      margin-top: 18px;
+      min-height: 24px;
+      font-size: 16px;
+      color: var(--sage-deep);
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity .35s ease, transform .35s ease;
+    }
+    .greeting.show { opacity: 1; transform: none; }
+
+    /* ----------  Check-in form  ---------- */
+    .card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      padding: 24px 26px;
+      margin-bottom: 22px;
+    }
+    .card h2 {
+      font-family: 'Fraunces', serif;
+      font-weight: 600; font-size: 19px; margin-bottom: 16px;
+    }
+    .field { margin-bottom: 14px; }
+    label {
+      display: block; font-size: 13px; font-weight: 600;
+      color: var(--evergreen); margin-bottom: 6px;
+    }
+    input[type="text"], select {
+      width: 100%;
+      font-family: inherit; font-size: 15px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--cream);
+      color: var(--evergreen);
+    }
+    input[type="text"]:focus, select:focus {
+      outline: 3px solid rgba(111,162,135,0.35);
+      outline-offset: 1px;
+      border-color: var(--sage);
+    }
+    .btn {
+      width: 100%;
+      font-family: inherit; font-size: 15px; font-weight: 600;
+      color: var(--cream);
+      background: var(--evergreen);
+      border: none; border-radius: 12px;
+      padding: 13px 16px;
+      cursor: pointer;
+      transition: transform .12s ease, background .2s ease;
+      margin-top: 4px;
+    }
+    .btn:hover { background: #18301F; }
+    .btn:active { transform: scale(0.985); }
+    .btn:focus-visible { outline: 3px solid rgba(232,181,77,0.6); outline-offset: 2px; }
+
+    /* ----------  Team cards  ---------- */
+    .teams {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+    .team {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-top: 4px solid var(--team, var(--sage));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      padding: 18px;
+      text-align: center;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .team.leading {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 34px rgba(31,59,44,0.14);
+    }
+    .team .emoji { font-size: 26px; }
+    .team .name {
+      font-weight: 600; font-size: 14px; margin: 6px 0 2px;
+    }
+    .team .num {
+      font-family: 'Fraunces', serif;
+      font-size: 34px; font-weight: 600; color: var(--team, var(--sage));
+      line-height: 1;
+    }
+    .team .crown {
+      display: inline-block; font-size: 12px; font-weight: 600;
+      color: var(--sun); letter-spacing: .04em;
+      visibility: hidden; margin-top: 6px;
+    }
+    .team.leading .crown { visibility: visible; }
+
+    /* ----------  Attendee list  ---------- */
+    .list-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .list-head h2 { font-family: 'Fraunces', serif; font-weight: 600; font-size: 19px; }
+    .reset {
+      background: none; border: none; cursor: pointer;
+      color: var(--muted); font-family: inherit; font-size: 13px;
+      text-decoration: underline; padding: 4px;
+    }
+    .reset:hover { color: var(--evergreen); }
+    .empty { color: var(--muted); font-size: 14px; padding: 8px 0; }
+    ul.attendees { list-style: none; }
+    ul.attendees li {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 4px;
+      border-bottom: 1px solid var(--line);
+      font-size: 15px;
+    }
+    ul.attendees li:last-child { border-bottom: none; }
+    .pill {
+      margin-left: auto;
+      font-size: 12px; font-weight: 600;
+      padding: 4px 11px; border-radius: 999px;
+      color: var(--paper); background: var(--sage);
+    }
+    .who { font-weight: 500; }
+
+    /* ----------  Celebration overlay  ---------- */
+    .celebrate {
+      position: fixed; inset: 0;
+      display: none;
+      place-items: center;
+      background: rgba(31,59,44,0.5);
+      backdrop-filter: blur(3px);
+      z-index: 50; padding: 20px;
+    }
+    .celebrate.show { display: grid; }
+    .celebrate-box {
+      background: var(--paper);
+      border-radius: 24px;
+      padding: 38px 34px;
+      max-width: 420px; text-align: center;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+      animation: pop .4s cubic-bezier(.2,.8,.3,1.2);
+    }
+    @keyframes pop { from { transform: scale(.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .celebrate-box .big { font-size: 46px; }
+    .celebrate-box h3 {
+      font-family: 'Fraunces', serif; font-weight: 600;
+      font-size: 26px; margin: 8px 0;
+    }
+    .celebrate-box p { color: var(--muted); margin-bottom: 20px; }
+    .celebrate-box .winner { color: var(--sage-deep); font-weight: 600; }
+    .celebrate-box .btn { width: auto; padding: 11px 26px; }
+
+    /* confetti */
+    .confetti {
+      position: fixed; top: -12px; width: 9px; height: 14px;
+      z-index: 49; pointer-events: none; border-radius: 2px;
+      animation: fall linear forwards;
+    }
+    @keyframes fall {
+      to { transform: translateY(105vh) rotate(540deg); opacity: 0.9; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .fill, .team, .greeting { transition: none; }
+      .confetti, .celebrate-box { animation: none; }
+    }
+
+    @media (max-width: 560px) {
+      .teams { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- Header -->
+    <header class="topbar">
+      <div class="leaf">i</div>
+      <div>
+        <div class="eyebrow">Intel · Sustainability Summit</div>
+        <h1>Team Check-In</h1>
+      </div>
+    </header>
+
+    <!-- Live status + progress -->
+    <section class="hero">
+      <div class="hero-top">
+        <div class="count"><span id="attendeeCount">0</span><small> checked in</small></div>
+        <div class="goal-label">Goal: <span id="goalText">50</span> attendees</div>
+      </div>
+      <div class="track" aria-hidden="true">
+        <div class="fill" id="progressFill"></div>
+      </div>
+      <div class="progress-meta">
+        <span id="percentText">0% there</span>
+        <span id="remainingText">50 to go</span>
+      </div>
+      <p class="greeting" id="greeting"></p>
+    </section>
+
+    <!-- Check-in form -->
+    <section class="card">
+      <h2>Check in an attendee</h2>
+      <div class="field">
+        <label for="attendeeName">Name</label>
+        <input type="text" id="attendeeName" placeholder="e.g. Teni Tanimola" autocomplete="off" />
+      </div>
+      <div class="field">
+        <label for="teamSelect">Team</label>
+        <select id="teamSelect">
+          <option value="water">🌊 Team Water Wise</option>
+          <option value="zero">🌍 Team Net Zero</option>
+          <option value="renewables">☀️ Team Renewables</option>
+        </select>
+      </div>
+      <button class="btn" id="checkInBtn">Check in</button>
+    </section>
+
+    <!-- Team tracking -->
+    <section class="teams">
+      <div class="team" id="team-water" style="--team: var(--sky-real)">
+        <div class="emoji">🌊</div>
+        <div class="name">Water Wise</div>
+        <div class="num" id="waterCount">0</div>
+        <div class="crown">▲ Leading</div>
+      </div>
+      <div class="team" id="team-zero" style="--team: var(--evergreen)">
+        <div class="emoji">🌍</div>
+        <div class="name">Net Zero</div>
+        <div class="num" id="zeroCount">0</div>
+        <div class="crown">▲ Leading</div>
+      </div>
+      <div class="team" id="team-renewables" style="--team: var(--sun)">
+        <div class="emoji">☀️</div>
+        <div class="name">Renewables</div>
+        <div class="num" id="renewablesCount">0</div>
+        <div class="crown">▲ Leading</div>
+      </div>
+    </section>
+
+    <!-- Attendee list -->
+    <section class="card">
+      <div class="list-head">
+        <h2>Who's here</h2>
+        <button class="reset" id="resetBtn">Reset check-ins</button>
+      </div>
+      <p class="empty" id="emptyNote">No check-ins yet — be the first through the door.</p>
+      <ul class="attendees" id="attendeeList"></ul>
+    </section>
+
+  </div>
+
+  <!-- Celebration overlay -->
+  <div class="celebrate" id="celebrate">
+    <div class="celebrate-box">
+      <div class="big">🎉</div>
+      <h3>Goal reached!</h3>
+      <p>The room is full. Strongest turnout goes to<br><span class="winner" id="winnerText">—</span></p>
+      <button class="btn" id="closeCelebrate">Nice!</button>
+    </div>
+  </div>
+
+  <script>
+    /* =========================================================
+       Intel Sustainability Summit — Check-In logic
+       ========================================================= */
+
+    // ----- Settings -----
+    const MAX_ALLOWED = 50;   // attendance goal. Lower this (e.g. 3) to test the celebration quickly.
+
+    // ----- State -----
+    // These three values are the heart of the app: a running total,
+    // a count per team, and the full list of people who checked in.
+    let attendeeCount = 0;
+    let teamCounts = { water: 0, zero: 0, renewables: 0 };
+    let attendees = [];                  // each item: { name: "...", team: "water" }
+    let celebrated = false;              // so the party only pops once
+
+    // Friendly labels for greetings + the winner announcement
+    const TEAM_INFO = {
+      water:      { name: "Team Water Wise", emoji: "🌊" },
+      zero:       { name: "Team Net Zero",   emoji: "🌍" },
+      renewables: { name: "Team Renewables", emoji: "☀️" }
+    };
+
+    // ----- Grab the elements we'll update -----
+    const nameInput   = document.getElementById("attendeeName");
+    const teamSelect  = document.getElementById("teamSelect");
+    const checkInBtn  = document.getElementById("checkInBtn");
+    const greetingEl  = document.getElementById("greeting");
+    const countEl     = document.getElementById("attendeeCount");
+    const fillEl      = document.getElementById("progressFill");
+    const percentEl   = document.getElementById("percentText");
+    const remainingEl = document.getElementById("remainingText");
+
+    // Show the goal in the page text
+    document.getElementById("goalText").textContent = MAX_ALLOWED;
+
+    /* ---------- The main action: check someone in ---------- */
+    function checkIn() {
+      const name = nameInput.value.trim();
+      const team = teamSelect.value;
+
+      // Don't add an empty name
+      if (name === "") {
+        greetingEl.textContent = "Pop a name in first, then check in.";
+        greetingEl.classList.add("show");
+        nameInput.focus();
+        return;
+      }
+
+      // 1. Add to the totals
+      attendeeCount++;
+      teamCounts[team]++;
+      attendees.push({ name: name, team: team });
+
+      // 2. Refresh everything on screen
+      showGreeting(name, team);
+      updateDisplay();
+      renderAttendeeList();
+      saveState();
+      checkGoal();
+
+      // 3. Reset the form for the next person
+      nameInput.value = "";
+      nameInput.focus();
+    }
+
+    /* ---------- Personalized greeting ---------- */
+    function showGreeting(name, team) {
+      const info = TEAM_INFO[team];
+      greetingEl.textContent =
+        `${info.emoji} Welcome, ${name}! You're checked in with ${info.name}.`;
+      greetingEl.classList.add("show");
+    }
+
+    /* ---------- Update count, progress bar, team cards ---------- */
+    function updateDisplay() {
+      // Total count
+      countEl.textContent = attendeeCount;
+
+      // Progress bar: what fraction of the goal have we hit?
+      const percent = Math.min(Math.round((attendeeCount / MAX_ALLOWED) * 100), 100);
+      fillEl.style.width = percent + "%";
+      percentEl.textContent = percent + "% there";
+
+      const remaining = Math.max(MAX_ALLOWED - attendeeCount, 0);
+      remainingEl.textContent = remaining === 0 ? "Goal reached" : remaining + " to go";
+
+      // Each team's number
+      document.getElementById("waterCount").textContent      = teamCounts.water;
+      document.getElementById("zeroCount").textContent       = teamCounts.zero;
+      document.getElementById("renewablesCount").textContent = teamCounts.renewables;
+
+      highlightLeader();
+    }
+
+    /* ---------- Highlight whichever team is ahead ---------- */
+    function highlightLeader() {
+      // clear old highlights
+      ["water", "zero", "renewables"].forEach(function (key) {
+        document.getElementById("team-" + key).classList.remove("leading");
+      });
+
+      const top = Math.max(teamCounts.water, teamCounts.zero, teamCounts.renewables);
+      if (top === 0) return; // nobody yet — no leader
+
+      // highlight every team tied for the lead
+      ["water", "zero", "renewables"].forEach(function (key) {
+        if (teamCounts[key] === top) {
+          document.getElementById("team-" + key).classList.add("leading");
+        }
+      });
+    }
+
+    /* ---------- Build the "Who's here" list ---------- */
+    function renderAttendeeList() {
+      const listEl  = document.getElementById("attendeeList");
+      const emptyEl = document.getElementById("emptyNote");
+      listEl.innerHTML = "";
+
+      if (attendees.length === 0) {
+        emptyEl.style.display = "block";
+        return;
+      }
+      emptyEl.style.display = "none";
+
+      // newest check-in on top
+      attendees.slice().reverse().forEach(function (person) {
+        const info = TEAM_INFO[person.team];
+        const li = document.createElement("li");
+        li.innerHTML =
+          '<span>' + info.emoji + '</span>' +
+          '<span class="who">' + escapeHtml(person.name) + '</span>' +
+          '<span class="pill" style="background:' + teamColor(person.team) + '">' +
+            info.name.replace("Team ", "") +
+          '</span>';
+        listEl.appendChild(li);
+      });
+    }
+
+    /* ---------- Celebration when we hit the goal ---------- */
+    function checkGoal() {
+      if (attendeeCount >= MAX_ALLOWED && !celebrated) {
+        celebrated = true;
+
+        // Find the winning team (most check-ins)
+        let winnerKey = "water";
+        ["zero", "renewables"].forEach(function (key) {
+          if (teamCounts[key] > teamCounts[winnerKey]) winnerKey = key;
+        });
+
+        const info = TEAM_INFO[winnerKey];
+        document.getElementById("winnerText").textContent =
+          info.emoji + " " + info.name + " (" + teamCounts[winnerKey] + " checked in)";
+
+        document.getElementById("celebrate").classList.add("show");
+        launchConfetti();
+      }
+    }
+
+    /* ---------- Save / load with localStorage ---------- */
+    function saveState() {
+      try {
+        const data = {
+          attendeeCount: attendeeCount,
+          teamCounts: teamCounts,
+          attendees: attendees,
+          celebrated: celebrated
+        };
+        localStorage.setItem("intelSummitCheckIn", JSON.stringify(data));
+      } catch (e) {
+        // localStorage can fail (e.g. private mode) — app still works for this session
+        console.warn("Couldn't save check-ins:", e);
+      }
+    }
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem("intelSummitCheckIn");
+        if (!saved) return;
+        const data = JSON.parse(saved);
+        attendeeCount = data.attendeeCount || 0;
+        teamCounts    = data.teamCounts || { water: 0, zero: 0, renewables: 0 };
+        attendees     = data.attendees || [];
+        celebrated    = data.celebrated || false;
+      } catch (e) {
+        console.warn("Couldn't load saved check-ins:", e);
+      }
+    }
+
+    function resetAll() {
+      attendeeCount = 0;
+      teamCounts = { water: 0, zero: 0, renewables: 0 };
+      attendees = [];
+      celebrated = false;
+      try { localStorage.removeItem("intelSummitCheckIn"); } catch (e) {}
+      greetingEl.classList.remove("show");
+      greetingEl.textContent = "";
+      updateDisplay();
+      renderAttendeeList();
+    }
+
+    /* ---------- Small helpers ---------- */
+    function teamColor(team) {
+      const styles = getComputedStyle(document.documentElement);
+      if (team === "water")      return styles.getPropertyValue("--sky-real");
+      if (team === "zero")       return styles.getPropertyValue("--evergreen");
+      return styles.getPropertyValue("--sun");
+    }
+
+    // keep names safe if someone types HTML characters
+    function escapeHtml(str) {
+      const div = document.createElement("div");
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function launchConfetti() {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const colors = ["#4F9BC4", "#6FA287", "#E8B54D", "#1F3B2C"];
+      for (let i = 0; i < 80; i++) {
+        const piece = document.createElement("div");
+        piece.className = "confetti";
+        piece.style.left = Math.random() * 100 + "vw";
+        piece.style.background = colors[i % colors.length];
+        piece.style.animationDuration = (2 + Math.random() * 2) + "s";
+        piece.style.animationDelay = Math.random() * 0.6 + "s";
+        document.body.appendChild(piece);
+        setTimeout(function () { piece.remove(); }, 4500);
+      }
+    }
+
+    /* ---------- Wire up the buttons ---------- */
+    checkInBtn.addEventListener("click", checkIn);
+
+    // let people press Enter in the name box to check in
+    nameInput.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") checkIn();
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", resetAll);
+    document.getElementById("closeCelebrate").addEventListener("click", function () {
+      document.getElementById("celebrate").classList.remove("show");
+    });
+
+    /* ---------- Start: load anything saved, then draw ---------- */
+    loadState();
+    updateDisplay();
+    renderAttendeeList();
+  </script>
+</body>
+</html>
